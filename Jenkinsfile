@@ -2,34 +2,34 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = "${WORKSPACE}/env" // Use the existing 'env' directory
+        VENV_DIR = "${WORKSPACE}\\env"  // Use backslashes for Windows paths
         REQUIREMENTS_FILE = "requirements.txt"
-        APP_ENTRY = "app.py" // Entry point of the Flask app
+        APP_ENTRY = "app.py"  // Entry point of the Flask app
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/qalander60/FinalExams.git' // Replace with your repo URL
+                git 'https://github.com/qalander60/FinalExams.git'  // Replace with your repo URL
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                source ${VENV_DIR}/bin/activate
+                bat '''
+                ${VENV_DIR}\\Scripts\\activate
                 pip install --upgrade pip
-                if [ -f ${WORKSPACE}/${REQUIREMENTS_FILE} ]; then
-                    pip install -r ${WORKSPACE}/${REQUIREMENTS_FILE}
-                fi
+                if exist ${WORKSPACE}\\${REQUIREMENTS_FILE} (
+                    pip install -r ${WORKSPACE}\\${REQUIREMENTS_FILE}
+                )
                 '''
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                sh '''
-                source ${VENV_DIR}/bin/activate
+                bat '''
+                ${VENV_DIR}\\Scripts\\activate
                 pytest --maxfail=1 --disable-warnings
                 '''
             }
@@ -37,8 +37,8 @@ pipeline {
 
         stage('Build the App') {
             steps {
-                sh '''
-                source ${VENV_DIR}/bin/activate
+                bat '''
+                ${VENV_DIR}\\Scripts\\activate
                 python -m flask --version
                 '''
             }
@@ -46,9 +46,9 @@ pipeline {
 
         stage('Deploy the App') {
             steps {
-                sh '''
-                source ${VENV_DIR}/bin/activate
-                nohup python ${WORKSPACE}/${APP_ENTRY} > app.log 2>&1 &
+                bat '''
+                ${VENV_DIR}\\Scripts\\activate
+                start /B python ${WORKSPACE}\\${APP_ENTRY} > app.log 2>&1
                 '''
             }
         }
